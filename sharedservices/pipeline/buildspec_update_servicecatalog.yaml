@@ -17,7 +17,7 @@ phases:
       - export "AWS_SESSION_TOKEN=$(echo "${ROLE}" | jq -r '.Credentials.SessionToken')"-
       - export "TGW_ID=$(aws ssm get-parameters --names "shared-networking-tgw-id" --with-decryption --query "Parameters[0].Value" | tr -d '"')"
       - echo $TGW_ID
-      - aws s3 cp s3://dinesh-vpcvendingmachine-servicecatalog/vpctemplate.yaml .
+      - aws s3 cp s3://$TEMPLATE_BUCKET/vpctemplate.yaml .
       - yq e  ".Parameters.TransitGatewayID.Default" vpctemplate.yaml
       - yq e '.Parameters.TransitGatewayID.Default = strenv(TGW_ID)' -i vpctemplate.yaml
-      - aws s3 cp vpctemplate.yaml s3://dinesh-vpcvendingmachine-servicecatalog/
+      - aws s3 cp vpctemplate.yaml s3://$TEMPLATE_BUCKET/

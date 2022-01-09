@@ -27,10 +27,10 @@ with open("./../../config.json") as config_file:
 
 ACCOUNT_LIST = ["dev", "test", "prod"]
 SHARED_NETWORKING_ACCOUNT_STAGE_ACTION = "up"
-MEMBER_ACCOUNT_STAGE_ACTION = "up"
 REPO_NAME = data["REPO_NAME"]
 SOURCE_VERSION = data["SOURCE_VERSION"]
 STATE_BUCKET = data["STATE_BUCKET"]
+TEMPLATE_BUCKET = data["TEMPLATE_BUCKET"]
 SHAREDNETWORKING_ACCOUNT_ID = data["ACCOUNT"]["SHARED_NETWORKING"]["ID"]
 SHAREDSERVICES_ACCOUNT_ID = data["ACCOUNT"]["SHARED_SERVICES"]["ID"]
 DEV = data["ACCOUNT"]["DEV"]["ID"]
@@ -441,6 +441,16 @@ codepipeline = aws.codepipeline.Pipeline(
                     version="1",
                     configuration={
                         "ProjectName": codebuild_project_update_service_catalog.name,
+                        "EnvironmentVariables": json.dumps(
+                            [
+                                {
+                                    "name": "TEMPLATE_BUCKET",
+                                    "value": TEMPLATE_BUCKET,
+                                    "type": "PLAINTEXT",
+                                },
+                                
+                            ]
+                        ),
                     },
                 )
             ],
@@ -486,7 +496,7 @@ codepipeline = aws.codepipeline.Pipeline(
                                 },
                                 {
                                     "name": "ACTION",
-                                    "value": SHARED_NETWORKING_ACCOUNT_STAGE_ACTION,
+                                    "value": "up",
                                     "type": "PLAINTEXT",
                                 },
                             ]
@@ -536,7 +546,7 @@ codepipeline = aws.codepipeline.Pipeline(
                                 },
                                 {
                                     "name": "ACTION",
-                                    "value": SHARED_NETWORKING_ACCOUNT_STAGE_ACTION,
+                                    "value": "up",
                                     "type": "PLAINTEXT",
                                 },
                             ]
