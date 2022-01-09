@@ -1,0 +1,48 @@
+{
+    "TEMPLATE_URL": "<S3 Link to VPC Template>",
+    "AZ": [
+        "<AZ1>",
+        "<AZ2>",
+        "<AZ3>"
+    ],
+    "ORGANIZATION_ID": "<ID of the AWS Organization>",
+    "REPO_NAME": "<Name of the Codecommit repo>",
+    "SOURCE_VERSION": "<Name of the branch>",
+    "STATE_BUCKET": "<Pulumi state bucket>",
+    "CODEPIPELINE_ARTIFACT_BUCKET": "<Name of the Codepipeline Artifact bucket>",
+    "IAM_USER": "<Name of the IAM User which needs permission to access Service Catalog portfolio>",
+    "ACCOUNT": {
+        "MASTER_ACCOUNT": {
+            "ID": "<Master Account ID>"
+        },
+        "SHARED_SERVICES": {
+            "ID": "<SharedServices Account ID>"
+        },
+        "SHARED_NETWORKING": {
+            "ID": "<SharedNetworking Account ID>",
+            "VPC_CIDR": "10.0.0.0/16",
+            "PRIVATE_SUBNET": [
+                "10.0.1.0/24",
+                "10.0.2.0/24",
+                "10.0.3.0/24"
+            ],
+            "PUBLIC_SUBNET": [
+                "10.0.4.0/24",
+                "10.0.5.0/24",
+                "10.0.6.0/24"
+            ]
+        },
+        "DEV": {
+            "ID": "<DEV Account ID>",
+            "VPC_CIDR": "10.1.0.0/16"
+        },
+        "TEST": {
+            "ID": "<TEST Account ID>",
+            "VPC_CIDR": "10.2.0.0/16"
+        },
+        "PROD": {
+            "ID": "<PROD Account ID>",
+            "VPC_CIDR": "10.3.0.0/16"
+        }
+    }
+}

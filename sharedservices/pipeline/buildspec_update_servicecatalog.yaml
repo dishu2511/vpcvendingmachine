@@ -1,0 +1,23 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      # pulumi
+      - wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+      - chmod a+x /usr/local/bin/yq
+      - curl -fsSL https://get.pulumi.com/ | sh
+      - export PATH=$PATH:$HOME/.pulumi/bin
+      - ROLE="$(aws sts assume-role --role-arn arn:aws:iam::$SHAREDNETWORKING_ACCOUNT_ID:role/vpcvendingmachine_cross_account_codebuild_role --role-session-name deploy --region ap-southeast-2 --endpoint-url https://sts.ap-southeast-2.amazonaws.com)" 
+      - export ROLE
+      - echo $ROLE
+      - aws sts get-caller-identity
+      - export "AWS_ACCESS_KEY_ID=$(echo "${ROLE}" | jq -re '.Credentials.AccessKeyId')"
+      - export "AWS_SECRET_ACCESS_KEY=$(echo "${ROLE}" | jq -r '.Credentials.SecretAccessKey')"
+      - export "AWS_SESSION_TOKEN=$(echo "${ROLE}" | jq -r '.Credentials.SessionToken')"-
+      - export "TGW_ID=$(aws ssm get-parameters --names "shared-networking-tgw-id" --with-decryption --query "Parameters[0].Value" | tr -d '"')"
+      - echo $TGW_ID
+      - aws s3 cp s3://dinesh-vpcvendingmachine-servicecatalog/vpctemplate.yaml .
+      - yq e  ".Parameters.TransitGatewayID.Default" vpctemplate.yaml
+      - yq e '.Parameters.TransitGatewayID.Default = strenv(TGW_ID)' -i vpctemplate.yaml
+      - aws s3 cp vpctemplate.yaml s3://dinesh-vpcvendingmachine-servicecatalog/

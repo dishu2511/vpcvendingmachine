@@ -1,0 +1,738 @@
+#This cloudformation creates VPC and TGW attchmment with Central Transit Gateway hosted inside Shared Networking account.
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation to create VPC infrastructure
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "VPC Parameters"
+        Parameters:
+          - Stackname
+          - ENV
+          - VpcCIDR
+          - AppSubnet1CIDR
+          - AppSubnet2CIDR
+          - AppSubnet3CIDR
+          - DBSubnet1CIDR
+          - DBSubnet2CIDR
+          - DBSubnet3CIDR
+          - PublicSubnet1CIDR
+          - PublicSubnet2CIDR
+          - PublicSubnet3CIDR
+      - Label:
+          default: "TGW parameters"
+        Parameters:
+          - TransitGatewayID
+Parameters:
+  Stackname:
+    Type: String
+    Description: The Stackname name; used in naming the TGW and other.
+    Default: "Demo"
+  ENV:
+    Type: String
+    Description: Name of the environment.
+    Default: "test"
+  VpcCIDR:
+    Description: The network CIDR of the VPC.
+    Type: String
+    Default: "10.0.0.0/16"
+  TransitGatewayID:
+    Description: ID of TransitGateway.
+    Type: String
+    Default: "tgw-0ed65545ebde5f97d"
+  #AppSubnets
+  AppSubnet1CIDR:
+    Description: The network CIDR of the subnet.
+    Type: String
+    Default: "10.0.0.0/24"
+  AppSubnet2CIDR:
+    Description: The network CIDR of the subnet.
+    Type: String
+    Default: "10.0.1.0/24"
+  AppSubnet3CIDR:
+    Description: The network CIDR of the subnet.
+    Type: String
+    Default: "10.0.2.0/24"
+  #DBSubnets
+  DBSubnet1CIDR:
+    Description: The network CIDR of the subnet.
+    Type: String
+    Default: "10.0.3.0/24"
+  DBSubnet2CIDR:
+    Description: The network CIDR of the subnet.
+    Type: String
+    Default: "10.0.4.0/24"
+  DBSubnet3CIDR:
+    Description: The network CIDR of the subnet.
+    Type: String
+    Default: "10.0.5.0/24"
+  #Public Subnets
+  PublicSubnet1CIDR:
+    Description: The network CIDR of the subnet.
+    Type: String
+    Default: "10.0.6.0/24"
+  PublicSubnet2CIDR:
+    Description: The network CIDR of the subnet.
+    Type: String
+    Default: "10.0.7.0/24"
+  PublicSubnet3CIDR:
+    Description: The network CIDR of the subnet.
+    Type: String
+    Default: "10.0.8.0/24"
+  
+Resources:
+  ###########################################################################################
+
+  #Creating VPC
+
+  ###########################################################################################
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock:
+        Fn::Sub: "${VpcCIDR}"
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-VPC"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  ###########################################################################################
+
+  #Creating Public Subnets
+
+  ###########################################################################################
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnet1CIDR
+      AvailabilityZone: !Select [0, {"Fn::GetAZs": !Ref "AWS::Region"}]
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-PublicSubnet1"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnet2CIDR
+      AvailabilityZone: !Select [1, {"Fn::GetAZs": !Ref "AWS::Region"}]
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-PublicSubnet2"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  PublicSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref PublicSubnet3CIDR
+      AvailabilityZone: !Select [2, {"Fn::GetAZs": !Ref "AWS::Region"}]
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-PublicSubnet3"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  ###########################################################################################
+
+  #Creating App Subnets
+
+  ###########################################################################################
+  AppSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref AppSubnet1CIDR
+      AvailabilityZone: !Select [0, {"Fn::GetAZs": !Ref "AWS::Region"}]
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-AppSubnet1"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  AppSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref AppSubnet2CIDR
+      AvailabilityZone: !Select [1, {"Fn::GetAZs": !Ref "AWS::Region"}]
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-AppSubnet2"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  AppSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref AppSubnet3CIDR
+      AvailabilityZone: !Select [2, {"Fn::GetAZs": !Ref "AWS::Region"}]
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-AppSubnet3"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  ###########################################################################################
+
+  #Creating DB Subnets
+
+  ###########################################################################################
+  DBSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref DBSubnet1CIDR
+      AvailabilityZone: !Select [0, {"Fn::GetAZs": !Ref "AWS::Region"}]
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-DBSubnet1"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  DBSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref DBSubnet2CIDR
+      AvailabilityZone: !Select [1, {"Fn::GetAZs": !Ref "AWS::Region"}]
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-DBSubnet2"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  DBSubnet3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: !Ref DBSubnet3CIDR
+      AvailabilityZone: !Select [2, {"Fn::GetAZs": !Ref "AWS::Region"}]
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-DBSubnet3"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  ###########################################################################################
+
+  #Transit Gateway Attachment
+
+  ###########################################################################################
+  TransitGatewayAttachment:
+    Type: AWS::EC2::TransitGatewayAttachment
+    #Condition: CreateTransitGatewayAttachmentCondition
+
+    Properties:
+      SubnetIds:
+        - !Ref AppSubnet1
+        - !Ref AppSubnet2
+        - !Ref AppSubnet3
+      TransitGatewayId: !Ref TransitGatewayID
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV} VPC TGW Attachment"
+  ###########################################################################################
+
+  #Creating Internet Gateway
+
+  ###########################################################################################
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-igw"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  ###########################################################################################
+
+  #Attaching Internet Gateway
+
+  ###########################################################################################
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+  ###########################################################################################
+
+  #Public route table configuration
+
+  ###########################################################################################
+  PublicSubnetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicSubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-PublicSubnet"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  PublicSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref PublicSubnetRouteTable
+  PublicSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicSubnetRouteTable
+  PublicSubnetRouteTableAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      RouteTableId: !Ref PublicSubnetRouteTable
+  ###########################################################################################
+
+  #Public NACL configuration
+
+  ###########################################################################################
+  PublicSubnetNetworkAcl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-PublicSubnet-NetworkAcl"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+      VpcId: !Ref VPC
+  PublicSubnetNetworkAclInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Ref: PublicSubnetNetworkAcl
+      RuleNumber: 120
+      Protocol: -1
+      Egress: false
+      RuleAction: allow
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: "0"
+        To: "65535"
+  PublicSubnetNetworkAclOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Ref: PublicSubnetNetworkAcl
+      RuleNumber: 120
+      Protocol: -1
+      Egress: true
+      RuleAction: allow
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: "0"
+        To: "65535"
+
+  ###########################################################################################
+
+  #Associating Public NACL with Public Subnets
+
+  ###########################################################################################
+  PublicSubnetNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      NetworkAclId: !Ref PublicSubnetNetworkAcl
+    DependsOn:
+      - PublicSubnetNetworkAcl
+      - PublicSubnet1
+  PublicSubnetNetworkAclAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      NetworkAclId: !Ref PublicSubnetNetworkAcl
+    DependsOn:
+      - PublicSubnetNetworkAcl
+      - PublicSubnet2
+  PublicSubnetNetworkAclAssociation3:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      NetworkAclId: !Ref PublicSubnetNetworkAcl
+    DependsOn:
+      - PublicSubnetNetworkAcl
+      - PublicSubnet3
+  ###########################################################################################
+
+  #App subnet route table configuration
+
+  ###########################################################################################
+  AppSubnetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: TransitGatewayAttachment
+    Properties:
+      RouteTableId: !Ref AppSubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      TransitGatewayId: !Ref TransitGatewayID
+  AppSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-AppSubnet"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  AppSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AppSubnet1
+      RouteTableId: !Ref AppSubnetRouteTable
+  AppSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AppSubnet2
+      RouteTableId: !Ref AppSubnetRouteTable
+  AppSubnetRouteTableAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AppSubnet3
+      RouteTableId: !Ref AppSubnetRouteTable
+  ###########################################################################################
+
+  #App subnet NACL configuration
+
+  ###########################################################################################
+  AppSubnetNetworkAcl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-AppSubnet-NetworkAcl"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+      VpcId: !Ref VPC
+  AppSubnetNetworkAclInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Ref: AppSubnetNetworkAcl
+      RuleNumber: 120
+      Protocol: -1
+      Egress: false
+      RuleAction: allow
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: "0"
+        To: "65535"
+  AppSubnetNetworkAclOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Ref: AppSubnetNetworkAcl
+      RuleNumber: 120
+      Protocol: -1
+      Egress: true
+      RuleAction: allow
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: "0"
+        To: "65535"
+  
+  ###########################################################################################
+
+  #Associating NACL with AppSubnets
+
+  ###########################################################################################
+  AppSubnetNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref AppSubnet1
+      NetworkAclId: !Ref AppSubnetNetworkAcl
+    DependsOn:
+      - AppSubnetNetworkAcl
+      - AppSubnet1
+  AppSubnetNetworkAclAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref AppSubnet2
+      NetworkAclId: !Ref AppSubnetNetworkAcl
+    DependsOn:
+      - AppSubnetNetworkAcl
+      - AppSubnet2
+  AppSubnetNetworkAclAssociation3:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref AppSubnet3
+      NetworkAclId: !Ref AppSubnetNetworkAcl
+    DependsOn:
+      - AppSubnetNetworkAcl
+      - AppSubnet3
+  ###########################################################################################
+
+  #DB subnet route table configuration
+
+  ###########################################################################################
+  DBSubnetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: TransitGatewayAttachment
+    Properties:
+      RouteTableId: !Ref DBSubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      TransitGatewayId: !Ref TransitGatewayID
+  DBSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-DBSubnet"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+  DBSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref DBSubnet1
+      RouteTableId: !Ref DBSubnetRouteTable
+  DBSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref DBSubnet2
+      RouteTableId: !Ref DBSubnetRouteTable
+  DBSubnetRouteTableAssociation3:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref DBSubnet3
+      RouteTableId: !Ref DBSubnetRouteTable
+  ###########################################################################################
+
+  #DB subnet NACL configuration
+
+  ###########################################################################################
+  DBSubnetNetworkAcl:
+    Type: AWS::EC2::NetworkAcl
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "${ENV}-DBSubnet-NetworkAcl"
+        - Key: environment
+          Value: !Ref ENV
+        - Key: business-unit
+          Value: ""
+        - Key: technical-contact
+          Value: ""
+        - Key: privacy-impact
+          Value: high
+      VpcId: !Ref VPC
+  DBSubnetNetworkAclInbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Ref: DBSubnetNetworkAcl
+      RuleNumber: 120
+      Protocol: -1
+      Egress: false
+      RuleAction: allow
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: "0"
+        To: "65535"
+  DBSubnetNetworkAclOutbound:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Ref: DBSubnetNetworkAcl
+      RuleNumber: 120
+      Protocol: -1
+      Egress: true
+      RuleAction: allow
+      CidrBlock: 0.0.0.0/0
+      PortRange:
+        From: "0"
+        To: "65535"
+  
+  ###########################################################################################
+
+  #Associating NACL with DBSubnets
+
+  ###########################################################################################
+  DBSubnetNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref DBSubnet1
+      NetworkAclId: !Ref DBSubnetNetworkAcl
+    DependsOn:
+      - DBSubnetNetworkAcl
+      - DBSubnet1
+  DBSubnetNetworkAclAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref DBSubnet2
+      NetworkAclId: !Ref DBSubnetNetworkAcl
+    DependsOn:
+      - DBSubnetNetworkAcl
+      - DBSubnet2
+  DBSubnetNetworkAclAssociation3:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref DBSubnet3
+      NetworkAclId: !Ref DBSubnetNetworkAcl
+    DependsOn:
+      - DBSubnetNetworkAcl
+      - DBSubnet3
+
+###########################################################################################
+
+#Outputs
+
+###########################################################################################
+Outputs:
+  VPCId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub "${ENV}"
+  PublicSubnet1:
+    Description: Public subnet 1 ID
+    Value: !Ref PublicSubnet1
+    Export:
+      Name: !Sub "${ENV}-PublicSubnet1"
+  PublicSubnet2:
+    Description: Public subnet 2 ID
+    Value: !Ref PublicSubnet2
+    Export:
+      Name: !Sub "${ENV}-PublicSubnet2"
+  PublicSubnet3:
+    Description: Public subnet 3 ID
+    Value: !Ref PublicSubnet3
+    Export:
+      Name: !Sub "${ENV}-PublicSubnet3"
+  AppSubnet1:
+    Description: Infrastructure subnet 1 ID
+    Value: !Ref AppSubnet1
+    Export:
+      Name: !Sub "${ENV}-AppSubnet1"
+  AppSubnet2:
+    Description: Infrastructure subnet 2 ID
+    Value: !Ref AppSubnet2
+    Export:
+      Name: !Sub "${ENV}-AppSubnet2"
+  AppSubnet3:
+    Description: Infrastructure subnet 3 ID
+    Value: !Ref AppSubnet3
+    Export:
+      Name: !Sub "${ENV}-AppSubnet3"
+  DBSubnet1:
+    Description: Infrastructure subnet 1 ID
+    Value: !Ref DBSubnet1
+    Export:
+      Name: !Sub "${ENV}-DBSubnet1"
+  DBSubnet2:
+    Description: Infrastructure subnet 2 ID
+    Value: !Ref DBSubnet2
+    Export:
+      Name: !Sub "${ENV}-DBSubnet2"
+  DBSubnet3:
+    Description: Infrastructure subnet 3 ID
+    Value: !Ref DBSubnet3
+    Export:
+      Name: !Sub "${ENV}-DBSubnet3"
+  TransitGatewayAttachment:
+    Description: Transit Gateway Attachment ID
+    Value: !Ref TransitGatewayAttachment
+    Export:
+      Name: !Sub "${ENV}-TransitGatewayAttachment"
